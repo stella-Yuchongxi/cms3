@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Posts</title>
+</head>
+<body>
+<h1>My Posts</h1>
+{{#if posts.length}}
+    <table>
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Comments Allowed</th>
+            <th>Body</th>
+            <th>Category</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each posts}}
+            <tr>
+                <td>{{this.title}}</td>
+                <td>{{this.status}}</td>
+                <td>{{#if this.allowComments}}Yes{{else}}No{{/if}}</td>
+                <td>{{this.body}}</td>
+                <td>{{#if this.category}}{{this.category.name}}{{else}}Uncategorized{{/if}}</td>
+                <td>{{formatDate this.date 'MMMM Do YYYY, h:mm:ss a'}}</td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+{{else}}
+    <p>No posts found.</p>
+{{/if}}
+</body>
+</html>

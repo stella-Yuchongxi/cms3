@@ -1,0 +1,36 @@
+<h1>All Posts</h1>
+{{> home/form-message}}
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>File</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Category</th>
+        <th>Allow Comments</th>
+        <th>Operations</th>
+<!--        <th>Date</th>-->
+    </tr>
+    </thead>
+    <tbody>
+    {{#if posts.length}}
+        {{#each posts}}
+            <tr>
+                <td>{{_id}}</td>
+                <td><img height="50" class="img-responsive" src="/uploads/{{file}}" alt=""></td>
+                <td>{{title}}</td>
+                <td>{{status}}</td>
+                <td>{{category.name}}</td>
+                <td>{{allowComments}}</td>
+                <td><a href="/admin/posts/edit/{{_id}}" class="btn btn-info">Edit</a></td>
+                <td><form action="/admin/posts/{{_id}}?_method=DELETE" method="post">
+                    <button type="submit" class="btn-danger">Delete</button>
+                </form></td>
+    <!--            <td>{{generateDate date 'MMMM Do YYYY'}}</td>-->
+            </tr>
+        {{/each}}
+    {{/if}}
+    </tbody>
+</table>
+

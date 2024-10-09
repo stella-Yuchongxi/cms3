@@ -1,0 +1,32 @@
+<h1>Edit Post</h1>
+<form action="/admin/posts/edit/{{post._id}}?_method=PUT" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="title">Title</label>
+        <input name="title" type="text" class="form-control" id="title" value="{{post.title}}" placeholder="Enter Title">
+    </div>
+    <div class="form-group">
+        <label for="file">File Upload</label>
+        <input name="file" type="file" class="form-control" id="title" placeholder="Enter Title">
+    </div>
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" class="form-control" id="status">
+            {{#select post.status}}
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+                <option value="draft">Draft</option>
+            {{/select}}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="allowComments" class="form-check-label">
+            <input name="allowComments" {{#if post.allowComments}} checked="checked" {{/if}}type="checkbox" class="form-check-input" id="allowComments" {{#if post.allowComments}}checked{{/if}}>
+            Allow Comments
+        </label>
+    </div>
+    <div class="form-group">
+        <label for="body">Body</label>
+        <textarea name="body" cols="30" rows="10" id="body" class="form-control" placeholder="Enter Description">{{post.body}}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
