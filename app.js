@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
 const Handlebars = require('handlebars');
 const { formatDate, generateDate, select } = require('./helpers/handlebars-helpers');
+const { breaklines } = require('./helpers/breakline-helpers');
 const methodOverride = require('method-override');
 const fileUpload = require('express-fileupload');
 const session = require('express-session');
@@ -18,7 +19,8 @@ app.engine('handlebars', engine({
     helpers: {
         formatDate: formatDate,
         generateDate: generateDate,
-        select: select
+        select: select,
+        breaklines: breaklines
     }
 }));
 app.set('view engine', 'handlebars');
