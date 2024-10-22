@@ -2,11 +2,22 @@
 <form action="/admin/posts/edit/{{post._id}}?_method=PUT" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label for="title">Title</label>
-        <input name="title" type="text" class="form-control" id="title" value="{{post.title}}" placeholder="Enter Title">
+        <input name="title" type="text" class="form-control" id="title" value="{{post.title}}"
+               placeholder="Enter Title">
     </div>
     <div class="form-group">
         <label for="file">File Upload</label>
         <input name="file" type="file" class="form-control" id="title" placeholder="Enter Title">
+    </div>
+    <div class="form-group">
+        <label for="status">Category</label>
+        <select name="category" class="form-control" id="category">
+            {{#select post.category}}
+                {{#each categories}}
+                    <option value="{{id}}">{{name}}</option>
+                {{/each}}
+            {{/select}}
+        </select>
     </div>
     <div class="form-group">
         <label for="status">Status</label>
@@ -20,13 +31,16 @@
     </div>
     <div class="form-group">
         <label for="allowComments" class="form-check-label">
-            <input name="allowComments" {{#if post.allowComments}} checked="checked" {{/if}}type="checkbox" class="form-check-input" id="allowComments" {{#if post.allowComments}}checked{{/if}}>
+            <input name="allowComments" {{#if post.allowComments}}
+                   checked="checked" {{/if}}type="checkbox" class="form-check-input" id="allowComments"
+                   {{#if post.allowComments}}checked{{/if}}>
             Allow Comments
         </label>
     </div>
     <div class="form-group">
         <label for="body">Body</label>
-        <textarea name="body" cols="30" rows="10" id="body" class="form-control" placeholder="Enter Description">{{post.body}}</textarea>
+        <textarea name="body" cols="30" rows="10" id="body" class="form-control"
+                  placeholder="Enter Description">{{post.body}}</textarea>
     </div>
     <button type="submit" class="btn btn-primary">Update</button>
 </form>

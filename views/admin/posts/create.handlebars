@@ -6,7 +6,7 @@
 {{/each}}
 <form action="/admin/posts/create" method="post" enctype="multipart/form-data">
     <div class="form-group">
-        <label for="title">Title</label>
+        <label for="title">name</label>
         <input name="title" type="text" class="form-control" id="title" placeholder="Enter Title" required>
     </div>
 
@@ -14,7 +14,14 @@
         <label for="file">File Upload</label>
         <input name="file" type="file" class="form-control" id="title" placeholder="Enter Title">
     </div>
-
+    <div class="form-group">
+        <label for="status">Category</label>
+        <select name="category" class="form-control" id="category">
+            {{#each categories}}
+            <option value="{{id}}">{{name}}</option>
+            {{/each}}
+        </select>
+    </div>
     <div class="form-group">
         <label for="status">Status</label>
         <select name="status" class="form-control" id="status">

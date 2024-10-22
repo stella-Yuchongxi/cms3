@@ -1,9 +1,11 @@
 const fs = require('fs');
 const express = require('express');
 const router = express.Router();
+const Category = require('../../models/Category');
 const Post = require('../../models/Post'); // Ensure this line correctly imports the Post model
 const path = require('path');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
+
 router.all('/*', (req, res, next) => {
     req.app.locals.layout = 'admin';
     next();
@@ -11,7 +13,7 @@ router.all('/*', (req, res, next) => {
 
 router.get('/', (req, res) => {
     // Uncomment the following block to fetch and render posts
-    Post.find({}).lean().then(posts => {
+    Post.find({}).lean().populate('category').then(posts => {
         res.render('admin/posts/index', {posts: posts});
     }).catch(err => {
         console.log(err);
@@ -24,7 +26,9 @@ router.get('/edit/:id', (req, res) => {
         if (!post) {
             return res.status(404).send('Post not found');
         }
-        res.render('admin/posts/edit', {post: post});
+        Category.find({}).then(categories=> {
+            res.render('admin/posts/edit', {post: post, categories: categories});
+        });
     }).catch(err => {
         console.log(err);
         res.redirect('/admin/posts');
@@ -36,10 +40,11 @@ router.get('/my-posts', (req, res) => {
     // });
     res.render('admin/posts/my-posts');
 });
-router.get('/edit', (req, res) => {
-})
 router.get('/create', (req, res) => {
-    res.render('admin/posts/create');
+    Category.find({}).then(categories=>{
+        res.render('admin/posts/create',{categories:categories});
+    });
+
 });
 
 router.put('/edit/:id', (req, res) => {
@@ -54,6 +59,7 @@ router.put('/edit/:id', (req, res) => {
         post.title = req.body.title;
         post.status = req.body.status;
         post.allowComments = allowComments;
+        post.category = req.body.category;
         post.body = req.body.body;
         if(!isEmpty(req.files)){
             let file = req.files.file;
@@ -76,48 +82,39 @@ router.put('/edit/:id', (req, res) => {
         res.redirect('/admin/posts');
     });
 });
-router.delete('/:id', (req, res) => {
-    Post.findById(req.params.id)
-        .then(post => {
-            if (!post) {
-                req.flash('error', 'Post not found');
+router.delete('/:id', async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+
+        if (!post) {
+            req.flash('error', 'Post not found');
+            return res.redirect('/admin/posts');
+        }
+
+        const uploadDir = './public/uploads/';
+        const filePath = path.join(uploadDir, post.file || '');
+
+        // Delete the associated file if it exists
+        if (post.file && fs.existsSync(filePath)) {
+            try {
+                await fs.promises.unlink(filePath);
+                console.log('File deleted:', filePath);
+            } catch (err) {
+                console.error('Error deleting file:', err);
+                req.flash('error', `Failed to delete file associated with post ${post._id}`);
                 return res.redirect('/admin/posts');
             }
+        }
 
-            const uploadDir = './public/uploads/';
-
-            // Unlink the file if it exists
-            if (post.file) {
-                fs.unlink(uploadDir + post.file, (err) => {
-                    if (err) {
-                        req.flash('error', `Failed to delete file associated with post ${post._id}`);
-                        return res.redirect('/admin/posts');
-                    }
-
-                    // Use deleteOne to remove the post after file unlinking
-                    Post.deleteOne({ _id: post._id }).then(() => {
-                        req.flash('success', `Post ${post._id} was deleted successfully`);
-                        res.redirect('/admin/posts');
-                    }).catch(err => {
-                        req.flash('error', 'Error occurred while deleting the post');
-                        res.redirect('/admin/posts');
-                    });
-                });
-            } else {
-                // If no file exists, just delete the post
-                Post.deleteOne({ _id: post._id }).then(() => {
-                    req.flash('success', `Post ${post._id} was deleted successfully`);
-                    res.redirect('/admin/posts');
-                }).catch(err => {
-                    req.flash('error', 'Error occurred while deleting the post');
-                    res.redirect('/admin/posts');
-                });
-            }
-        })
-        .catch(err => {
-            req.flash('error', 'Error occurred while finding the post');
-            res.redirect('/admin/posts');
-        });
+        // Delete the post from the database
+        await Post.deleteOne({ _id: post._id });
+        req.flash('success', `Post ${post._id} was deleted successfully`);
+        res.redirect('/admin/posts');
+    } catch (err) {
+        console.error('Error during deletion:', err);
+        req.flash('error', 'Error occurred while deleting the post');
+        res.redirect('/admin/posts');
+    }
 });
 
 router.post('/create', (req, res) => {
@@ -163,6 +160,7 @@ router.post('/create', (req, res) => {
         status: req.body.status,
         allowComments: allowComments,
         body: req.body.body,
+        category: req.body.category,
         file: filename  // Save the file name in the database
     });
 

@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
 const Handlebars = require('handlebars');
-const { formatDate, generateDate, select } = require('./helpers/handlebars-helpers');
+const { formatDate, generateDate, select, ifEquals} = require('./helpers/handlebars-helpers');
 const { breaklines } = require('./helpers/breakline-helpers');
 const methodOverride = require('method-override');
 const fileUpload = require('express-fileupload');
@@ -20,7 +20,8 @@ app.engine('handlebars', engine({
         formatDate: formatDate,
         generateDate: generateDate,
         select: select,
-        breaklines: breaklines
+        breaklines: breaklines,
+        ifEquals: ifEquals
     }
 }));
 app.set('view engine', 'handlebars');
@@ -39,13 +40,14 @@ app.use(fileUpload());  // Note the parentheses - this initializes the middlewar
 app.use(methodOverride('_method'));
 app.use(session({
     secret:'edwindiaz123ilovecoding',
-    resave: true,
+    resave: false,
     saveUninitialized: true
 }));
 app.use(flash());
 //Local variables using Middleware
 app.use((req,res,next) => {
     res.locals.success = req.flash('success');
+    res.locals.warn = req.flash('warn');
     next();
 });
 
@@ -53,11 +55,13 @@ app.use((req,res,next) => {
 const home = require('./routes/home/main');
 const admin = require('./routes/admin/index');
 const posts = require('./routes/admin/posts');
+const categories = require('./routes/admin/categories');
 
 // Use Routes
 app.use('/', home);
 app.use('/admin', admin);
 app.use('/admin/posts', posts);
+app.use('/admin/categories', categories);
 // Start Server
 app.listen(4500, () => {
     console.log('Server running on port 4500');

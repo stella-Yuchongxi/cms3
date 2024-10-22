@@ -24,6 +24,13 @@
 {{> home/home-nav}}
 <!-- Page Content -->
 <div class="container">
+    {{#if errors}}
+        {{#each errors}}
+            <div class="alert alert-danger">
+                {{this.message}}
+            </div>
+        {{/each}}
+    {{/if}}
     {{{body}}}
 <!--    <div class="row">-->
 
