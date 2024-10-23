@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const {authenticateUser} = require('../../helpers/authentication')
 const { faker } = require('@faker-js/faker');
 const Post = require('../../models/Post');  // Ensure you are importing the correct model
 
-router.all('/*', (req, res, next) => {
+router.all('/*', authenticateUser,(req, res, next) => {
     req.app.locals.layout = 'admin';
     next();
 });

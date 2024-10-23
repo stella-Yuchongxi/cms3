@@ -1,12 +1,13 @@
 const fs = require('fs');
 const express = require('express');
 const router = express.Router();
+const {authenticateUser} = require('../../helpers/authentication')
 const Category = require('../../models/Category');
 const Post = require('../../models/Post'); // Ensure this line correctly imports the Post model
 const path = require('path');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
 
-router.all('/*', (req, res, next) => {
+router.all('/*',authenticateUser, (req, res, next) => {
     req.app.locals.layout = 'admin';
     next();
 });

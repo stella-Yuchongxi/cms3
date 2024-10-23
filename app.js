@@ -12,6 +12,9 @@ const methodOverride = require('method-override');
 const fileUpload = require('express-fileupload');
 const session = require('express-session');
 const flash = require('connect-flash');
+const {mongoDbUrl} = require('./config/database')
+const passport = require('passport');
+const authenticateUser = require('./helpers/authentication');
 // Handlebars configuration
 app.engine('handlebars', engine({
     handlebars: allowInsecurePrototypeAccess(Handlebars),
@@ -28,7 +31,7 @@ app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/cms', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoDbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB Connected!'))
     .catch(err => console.log('MongoDB connection error:', err));
 
@@ -43,9 +46,14 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(flash());
 //Local variables using Middleware
 app.use((req,res,next) => {
+    res.locals.user = req.user || null;
     res.locals.success = req.flash('success');
     res.locals.warn = req.flash('warn');
     next();
@@ -58,6 +66,10 @@ const posts = require('./routes/admin/posts');
 const categories = require('./routes/admin/categories');
 
 // Use Routes
+app.use((req, res, next) => {
+    console.log('User session:', req.user); // Should log `null` or `undefined` after logout
+    next();
+});
 app.use('/', home);
 app.use('/admin', admin);
 app.use('/admin/posts', posts);

@@ -7,6 +7,8 @@ const User= require('../../models/User');
 const path = require('path');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
 const bcrypt = require('bcryptjs');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 
 router.all('/*', (req, res,next) => {
     req.app.locals.layout = 'home';
@@ -58,9 +60,91 @@ router.get('/about', (req, res) => {
     res.render('home/about');
 });
 router.get('/login', (req, res) => {
-    res.render('home/login');
+    res.render('home/login', {
+        error: req.flash('error') // Pass the flash message to the view
+    });
+});
+passport.serializeUser((user, done) => {
+    console.log('Serializing user:', user.id);
+    done(null, user.id); // Store user ID in session
 });
 
+passport.deserializeUser(async (id, done) => {
+    console.log('Deserializing user with ID:', id);
+    try {
+        const user = await User.findById(id).lean(); // Using async/await
+        done(null, user); // If user is found, pass it to the done callback
+    } catch (err) {
+        done(err, null); // If there's an error, pass the error
+    }
+});
+
+// Local strategy for user authentication
+passport.use(
+    new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
+        // Find user by email
+        User.findOne({ email: email })
+            .then((user) => {
+                if (!user) {
+                    // No user found with that email
+                    return done(null, false, { message: 'No user found with this email.' });
+                }
+
+                // Match password using bcrypt
+                bcrypt.compare(password, user.password, (err, isMatch) => {
+                    if (err) throw err;
+
+                    if (isMatch) {
+                        return done(null, user);
+                    } else {
+                        return done(null, false, { message: 'Password is incorrect.' });
+                    }
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+                return done(err);
+            });
+    })
+);
+
+router.post('/login', (req, res,next) => {
+    console.log('Login attempt:', req.body, req.user);
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            console.error('Authentication error:', err);
+            return next(err);
+        }
+        if (!user) {
+            req.flash('error', info ? info.message : 'Login failed.');
+            return res.redirect('/login');
+        }
+        req.logIn(user, (err) => {
+            if (err) {
+                console.error('Login error:', err);
+                return next(err);
+            }
+            console.log('User logged in successfully:', req.user); // Verify user in session
+            return res.redirect('/admin');
+        });
+    })(req, res, next);
+    // passport.authenticate('local', {
+    //     successRedirect: '/admin',
+    //     failureRedirect: '/login',
+    //     failureFlash: true
+    // })(req,res,next);
+});
+router.get('/logout', (req, res) => {
+    req.logOut((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.redirect('/admin'); // Redirect to a fallback page if needed
+        }
+        console.log('Logout session:', req.user); // Should log `null` or `undefined` after logout
+        req.flash('success', 'You have logged out successfully');
+        res.redirect('/login');
+    });
+});
 router.get('/register', (req, res) => {
     res.render('home/register');
 });

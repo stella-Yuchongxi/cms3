@@ -13,7 +13,8 @@ const UserSchema = new Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -21,4 +22,8 @@ const UserSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('user', UserSchema);
+UserSchema.methods.testMethod = function () {
+    console.log('using schema methods')
+}
+
+module.exports = mongoose.model('User', UserSchema);

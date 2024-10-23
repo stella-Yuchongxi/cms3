@@ -3,9 +3,9 @@ const router = express.Router();
 const Category = require('../../models/Category');
 const Post = require("../../models/Post");
 const {isEmpty} = require("../../helpers/upload-helper");
-
+const {authenticateUser} = require('../../helpers/authentication')
 // Middleware to set layout for admin routes
-router.all('/*', (req, res, next) => {
+router.all('/*', authenticateUser,(req, res, next) => {
     req.app.locals.layout = 'admin';
     next();
 });
