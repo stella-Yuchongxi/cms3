@@ -15,6 +15,7 @@ const flash = require('connect-flash');
 const {mongoDbUrl} = require('./config/database')
 const passport = require('passport');
 const authenticateUser = require('./helpers/authentication');
+const axios = require('axios');
 // Handlebars configuration
 app.engine('handlebars', engine({
     handlebars: allowInsecurePrototypeAccess(Handlebars),
@@ -74,6 +75,20 @@ app.use('/', home);
 app.use('/admin', admin);
 app.use('/admin/posts', posts);
 app.use('/admin/categories', categories);
+// Add a route to handle chat requests
+app.post('/chat', async (req, res) => {
+    try {
+        const userMessage = req.body.message;
+        const response = await axios.post('http://localhost:5000/llm', {
+            message: userMessage
+        });
+        const botReply = response.data.reply;
+        res.json({ reply: botReply });
+    } catch (error) {
+        console.error('Error communicating with the LLM service:', error);
+        res.status(500).json({ reply: 'Sorry, I cannot process your request right now.' });
+    }
+});
 // Start Server
 app.listen(4500, () => {
     console.log('Server running on port 4500');

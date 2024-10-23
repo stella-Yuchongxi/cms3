@@ -34,10 +34,42 @@
 
           <!-- Side Widget -->
           <div class="card my-4">
-            <h5 class="card-header">Side Widget</h5>
+            <h5 class="card-header">Chatbot</h5>
             <div class="card-body">
-              You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
+                <div id="chat-window" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto;">
+                    <!-- Chat messages will appear here -->
+                </div>
+                <input type="text" id="userMessage" placeholder="Type your message here" class="form-control"/>
+                <button id="sendMessage" class="btn btn-primary mt-2">Send</button>
             </div>
           </div>
+            <script>
+                document.getElementById('sendMessage').addEventListener('click', async () => {
+                    const message = document.getElementById('userMessage').value;
+                    if (!message) return;
 
+                    // Display the user's message in the chat window
+                    const chatWindow = document.getElementById('chat-window');
+                    chatWindow.innerHTML += `<div><strong>You:</strong> ${message}</div>`;
+
+                    // Send the message to the Node.js server
+                    try {
+                        const response = await fetch('/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ message })
+                        });
+                        const data = await response.json();
+                        document.getElementById('userMessage').value = ''; // Clear the input field
+                        chatWindow.innerHTML += `<div><strong>Bot:</strong> ${data.reply}</div>`;
+                    } catch (error) {
+                        chatWindow.innerHTML += `<div><strong>Error:</strong> Unable to communicate with the chatbot.</div>`;
+                    }
+
+                    // Scroll to the bottom of the chat window
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                });
+            </script>
         </div>
