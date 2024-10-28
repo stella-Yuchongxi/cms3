@@ -1,0 +1,6 @@
+node_modules
+# Ignore JetBrains IDE settings
+.idea/
+
+# Ignore uploaded files
+public/uploads/
