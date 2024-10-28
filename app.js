@@ -79,13 +79,15 @@ app.use('/admin/categories', categories);
 app.post('/chat', async (req, res) => {
     try {
         const userMessage = req.body.message;
-        const response = await axios.post('http://localhost:5000/llm', {
-            message: userMessage
+        const userId = req.user._id || 'default_user'; // Extract userId or set a default value if it's not provided
+        const response = await axios.post('http://localhost:5001/llm', {
+            message: userMessage,
+            user_id: userId // Ensure that this matches what the Flask app expects
         });
         const botReply = response.data.reply;
         res.json({ reply: botReply });
     } catch (error) {
-        console.error('Error communicating with the LLM service:', error);
+        console.error('Error communicating with the LLM service:', error.response ? error.response.data : error.message);
         res.status(500).json({ reply: 'Sorry, I cannot process your request right now.' });
     }
 });
