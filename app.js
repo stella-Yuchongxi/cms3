@@ -80,7 +80,7 @@ app.post('/chat', async (req, res) => {
     try {
         const userMessage = req.body.message;
         const userId = req.user._id || 'default_user'; // Extract userId or set a default value if it's not provided
-        const response = await axios.post('http://www.educatorassistant.com/llm', {
+        const response = await axios.post('https://www.educatorassistant.com/llm', {
             message: userMessage,
             user_id: userId // Ensure that this matches what the Flask app expects
         });
