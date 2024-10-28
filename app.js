@@ -91,7 +91,8 @@ app.post('/chat', async (req, res) => {
         res.status(500).json({ reply: 'Sorry, I cannot process your request right now.' });
     }
 });
+const port = process.env.PORT || 4500;
 // Start Server
-app.listen(4500, () => {
-    console.log('Server running on port 4500');
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
