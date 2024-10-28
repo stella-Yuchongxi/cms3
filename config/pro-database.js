@@ -1,4 +1,4 @@
 module.exports = {
-    mongoDbUrl: 'MongoDb_url'
+    mongoDbUrl: 'mongodb+srv://cms-user:123@cluster0.jcstz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 
 };
