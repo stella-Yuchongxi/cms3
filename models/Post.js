@@ -23,7 +23,7 @@ const PostSchema = new Schema({
         required: true
     },
     file: {
-        type: String,
+        type: String
     },
     category: {
         type: Schema.Types.ObjectId,

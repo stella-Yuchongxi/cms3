@@ -1,4 +1,5 @@
 <h1>All Posts</h1>
+<link rel="stylesheet" href="/css/post-image.css">
 {{> home/form-message}}
 <table class="table table-bordered">
     <thead>
@@ -19,7 +20,7 @@
         {{#each posts}}
             <tr>
                 <td>{{_id}}</td>
-                <td><img height="50" class="img-responsive" src="/uploads/{{file}}" alt=""></td>
+                <td><img src="{{file}}" alt="Post Image" class="post-image"></td>
                 <td>{{title}}</td>
                 <td>{{status}}</td>
                 <td>{{category.name}}</td>

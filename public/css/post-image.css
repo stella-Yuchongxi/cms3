@@ -1,0 +1,7 @@
+.post-image {
+    width: 50px;  /* 设置宽度 */
+    height: 50px; /* 设置高度 */
+    object-fit: cover; /* 保持图片比例并填满容器 */
+    display: block;
+    margin: auto; /* 水平居中 */
+}

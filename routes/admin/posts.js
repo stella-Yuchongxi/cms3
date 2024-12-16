@@ -6,6 +6,7 @@ const Category = require('../../models/Category');
 const Post = require('../../models/Post'); // Ensure this line correctly imports the Post model
 const path = require('path');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
+const upload = require("../../helpers/upload-helper");
 
 router.all('/*',authenticateUser, (req, res, next) => {
     req.app.locals.layout = 'admin';
@@ -47,42 +48,42 @@ router.get('/create', (req, res) => {
     });
 
 });
-
-router.put('/edit/:id', (req, res) => {
+router.put('/edit/:id', upload.single('file'), (req, res) => {
     Post.findById(req.params.id).then(post => {
         if (!post) {
             return res.status(404).send('Post not found');
         }
 
+        // 處理 allowComments
         let allowComments = req.body.allowComments ? true : false;
 
-        // Update post fields
+        // 更新帖子字段
         post.title = req.body.title;
         post.status = req.body.status;
         post.allowComments = allowComments;
         post.category = req.body.category;
         post.body = req.body.body;
-        if(!isEmpty(req.files)){
-            let file = req.files.file;
-            filename = Date.now() + '_' + file.name;
-            post.file = filename;
-            file.mv('./public/uploads/' + filename,(err)=>{
-                if(err) throw err;
-            });
+
+        // 處理文件上傳（如果有文件）
+        if (req.file) {
+            post.file = req.file.path;
+            // 移動文件到目標目錄（multer 自動處理）
         }
-        // Save updated post
+
+        // 保存更新的帖子
         post.save().then(updatedPost => {
             req.flash('success', `Post ${post._id} updated!`);
             res.redirect('/admin/posts');
         }).catch(err => {
-            console.log(err);
+            console.error(err);
             res.redirect('/admin/posts/edit/' + req.params.id);
         });
     }).catch(err => {
-        console.log(err);
+        console.error(err);
         res.redirect('/admin/posts');
     });
 });
+
 router.delete('/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
@@ -117,63 +118,35 @@ router.delete('/:id', async (req, res) => {
         res.redirect('/admin/posts');
     }
 });
+router.post('/create', upload.single('file'), async (req, res) => {
+    try {
+        console.log(req.file); // 确保文件信息被接收
+        console.log(req.body); // 确保表单字段被接收
 
-router.post('/create', (req, res) => {
-    let errors = [];
-
-    let filename = 'default.jpg';  // Default filename if no file is uploaded
-
-    if (!isEmpty(req.files)) {
-        if (req.files && req.files.file) {
-            let file = req.files.file;
-
-            // Sanitize the filename
-            filename = Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
-
-            // Correct the path to point to the right directory
-            const uploadPath = path.join(__dirname, '../../public/uploads');
-            if (!fs.existsSync(uploadPath)) {
-                fs.mkdirSync(uploadPath, {recursive: true});
-            }
-
-            // Move the file to the correct directory
-            file.mv(path.join(uploadPath, filename), (err) => {
-                if (err) {
-                    console.log(err);
-                    return res.status(500).send('Failed to upload file.');
-                }
-
-                // File upload success
-                console.log('File Information:');
-                console.log('Name:', file.name);
-                console.log('Data:', file.data);
-                console.log('Encoding:', file.encoding);
-                console.log('Mimetype:', file.mimetype);
-            });
+        if (!req.file) {
+            return res.status(400).send('File is required.');
         }
+
+        // 创建新帖子
+        const newPost = new Post({
+            title: req.body.title,
+            body: req.body.body,
+            file: req.file.path, // Cloudinary 返回的 URL
+            allowComments: req.body.allowComments === 'on',
+            status: req.body.status || 'public'
+        });
+
+        newPost.save().then(savedPost => {
+            req.flash('success', `Post ${savedPost.id } added successfully!`);
+            res.redirect('/admin/posts');
+        }).catch(error => {
+            console.log(error, 'could not save post');
+            // res.redirect('/admin/posts/create');
+        });
+    } catch (error) {
+        console.error('Error creating post:', error.message);
+        res.status(500).send('Server error');
     }
-
-    // Creating the new post after file handling is complete
-    let allowComments = req.body.allowComments ? true : false;
-
-    const newPost = new Post({
-        title: req.body.title,
-        status: req.body.status,
-        allowComments: allowComments,
-        body: req.body.body,
-        category: req.body.category,
-        file: filename  // Save the file name in the database
-    });
-
-    newPost.save().then(savedPost => {
-        req.flash('success', `Post ${savedPost.id } added successfully!`);
-        res.redirect('/admin/posts');
-    }).catch(error => {
-        console.log(error, 'could not save post');
-        // res.redirect('/admin/posts/create');
-    });
-
-
 });
 
 module.exports = router;

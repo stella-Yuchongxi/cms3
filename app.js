@@ -9,7 +9,6 @@ const Handlebars = require('handlebars');
 const { formatDate, generateDate, select, ifEquals} = require('./helpers/handlebars-helpers');
 const { breaklines } = require('./helpers/breakline-helpers');
 const methodOverride = require('method-override');
-const fileUpload = require('express-fileupload');
 const session = require('express-session');
 const flash = require('connect-flash');
 const {mongoDbUrl} = require('./config/database')
@@ -37,10 +36,10 @@ mongoose.connect(mongoDbUrl, { useNewUrlParser: true, useUnifiedTopology: true }
     .catch(err => console.log('MongoDB connection error:', err));
 
 // Middleware
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(fileUpload());  // Note the parentheses - this initializes the middleware
 app.use(methodOverride('_method'));
 app.use(session({
     secret:'edwindiaz123ilovecoding',
