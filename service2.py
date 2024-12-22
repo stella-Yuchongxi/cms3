@@ -2,9 +2,10 @@ from flask import Flask, request, jsonify
 import os
 import openai
 import sqlite3
+from dotenv import load_dotenv
 
+load_dotenv()
 # Set up OpenAI API key
-os.environ["OPENAI_API_KEY"] = 'sk-xAfFbDC9Iwgb4NUIfTP03PpT-VPJRvK0OYno2qIK6ST3BlbkFJqM4m91rf8GtiW734nxo0fEixeL2Incj9ehwcbauJcA'
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # Initialize Flask app
