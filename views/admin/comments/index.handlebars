@@ -1,0 +1,21 @@
+<h1>Comments</h1>
+<table class="table">
+    <thead>
+    <tr>
+        <th>_id</th>
+        <th>Author</th>
+        <th>Body</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#each comments}}
+    <tr>
+        <th>{{_id}}</th>
+        <td>{{user.firstName}} {{user.lastName}}</td>
+        <td>{{body}}</td>
+        <td>{{generateDate date "MMMM Do YYYY"}}</td>
+    </tr>
+    {{/each}}
+    </tbody>
+</table>
