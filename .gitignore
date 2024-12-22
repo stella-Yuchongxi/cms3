@@ -4,3 +4,5 @@ node_modules
 
 # Ignore uploaded files
 public/uploads/
+# Add this line to .gitignore
+environment.env
