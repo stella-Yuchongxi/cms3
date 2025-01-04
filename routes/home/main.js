@@ -43,19 +43,38 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/post/:id', (req, res) => {
-    Post.findById(req.params.id).lean().then(post => {
+router.get('/post/:id', async (req, res) => {
+    try {
+        // Find the post by ID and populate comments and their user details
+        const post = await Post.findById(req.params.id)
+            .populate({
+                path: 'comments',
+                populate: { path: 'user', model: 'User' },
+            })
+            .populate('user')
+            .lean();
+
+        // Handle missing post
         if (!post) {
-            return res.status(404).send('Post not found');
+            req.flash('error', 'Post not found');
+            return res.redirect('/');
         }
-        Category.find({}).then(categories=>{
-            res.render('home/post', { post: post , categories: categories});  // Corrected the path to 'home/post'
-        });
-    }).catch(err => {
-        console.log(err);
-        res.redirect('/');  // Redirect to the home page in case of error
-    });
+
+        // Fetch all categories
+        const categories = await Category.find({}).lean();
+
+        // Render the 'home/post' view with post and category data
+        res.render('home/post', { post, categories });
+    } catch (err) {
+        console.error('Error fetching post or categories:', err);
+
+        // Handle errors gracefully
+        req.flash('error', 'An unexpected error occurred. Please try again later.');
+        res.redirect('/');
+    }
 });
+
+
 router.get('/about', (req, res) => {
     res.render('home/about');
 });
@@ -125,7 +144,7 @@ router.post('/login', (req, res,next) => {
                 return next(err);
             }
             console.log('User logged in successfully:', req.user); // Verify user in session
-            return res.redirect('/admin');
+            return res.redirect('/');
         });
     })(req, res, next);
     // passport.authenticate('local', {

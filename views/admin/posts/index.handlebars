@@ -10,8 +10,9 @@
         <th>Status</th>
         <th>Category</th>
         <th>Allow Comments</th>
+        <th>View Post</th>
         <th>Date</th>
-        <th>Operations</th>
+<!--        <th>Operations</th>-->
 <!--        <th>Date</th>-->
     </tr>
     </thead>
@@ -25,11 +26,9 @@
                 <td>{{status}}</td>
                 <td>{{category.name}}</td>
                 <td>{{allowComments}}</td>
+                <td><a href="/post/{{_id}}">View</a></td>
                 <td>{{generateDate date 'MMMM Do YYYY'}}</td>
-                <td><a href="/admin/posts/edit/{{_id}}" class="btn btn-info">Edit</a></td>
-                <td><form action="/admin/posts/{{_id}}?_method=DELETE" method="post">
-                    <button type="submit" class="btn-danger">Delete</button>
-                </form></td>
+
     <!--            <td>{{generateDate date 'MMMM Do YYYY'}}</td>-->
             </tr>
         {{/each}}

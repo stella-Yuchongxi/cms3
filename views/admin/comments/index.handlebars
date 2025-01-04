@@ -13,8 +13,14 @@
     <tr>
         <th>{{_id}}</th>
         <td>{{user.firstName}} {{user.lastName}}</td>
+        <td><input type="checkbox" name="approveComment"></td>
         <td>{{body}}</td>
         <td>{{generateDate date "MMMM Do YYYY"}}</td>
+        <td>
+            <form action="/admin/comments/delete/{{_id}}" method="post">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </td>
     </tr>
     {{/each}}
     </tbody>

@@ -1,39 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Posts</title>
-</head>
-<body>
 <h1>My Posts</h1>
-{{#if posts.length}}
-    <table>
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Comments Allowed</th>
-            <th>Body</th>
-            <th>Category</th>
-            <th>Date</th>
-        </tr>
-        </thead>
-        <tbody>
+<link rel="stylesheet" href="/css/post-image.css">
+{{> home/form-message}}
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>File</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Category</th>
+        <th>Allow Comments</th>
+        <th>Date</th>
+        <th>Operations</th>
+        <!--        <th>Date</th>-->
+    </tr>
+    </thead>
+    <tbody>
+    {{#if posts.length}}
         {{#each posts}}
             <tr>
-                <td>{{this.title}}</td>
-                <td>{{this.status}}</td>
-                <td>{{#if this.allowComments}}Yes{{else}}No{{/if}}</td>
-                <td>{{this.body}}</td>
-                <td>{{#if this.category}}{{this.category.name}}{{else}}Uncategorized{{/if}}</td>
-                <td>{{formatDate this.date 'MMMM Do YYYY, h:mm:ss a'}}</td>
+                <td>{{_id}}</td>
+                <td><img src="{{file}}" alt="Post Image" class="post-image"></td>
+                <td>{{title}}</td>
+                <td>{{status}}</td>
+                <td>{{category.name}}</td>
+                <td>{{allowComments}}</td>
+                <td>{{generateDate date 'MMMM Do YYYY'}}</td>
+                <td><a href="/admin/posts/edit/{{_id}}" class="btn btn-info">Edit</a></td>
+                <td><form action="/admin/posts/{{_id}}?_method=DELETE" method="post">
+                    <button type="submit" class="btn-danger">Delete</button>
+                </form></td>
+                <!--            <td>{{generateDate date 'MMMM Do YYYY'}}</td>-->
             </tr>
         {{/each}}
-        </tbody>
-    </table>
-{{else}}
-    <p>No posts found.</p>
-{{/if}}
-</body>
-</html>
+    {{/if}}
+    </tbody>
+</table>
+

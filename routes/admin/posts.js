@@ -7,7 +7,7 @@ const Post = require('../../models/Post'); // Ensure this line correctly imports
 const path = require('path');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
 const upload = require("../../helpers/upload-helper");
-
+const Comment = require('../../models/Comment'); // Adjust the path if needed
 router.all('/*',authenticateUser, (req, res, next) => {
     req.app.locals.layout = 'admin';
     next();
@@ -22,6 +22,14 @@ router.get('/', (req, res) => {
     });
     // Temporary line to test the route
     // res.render('admin/posts/create');
+});
+router.get('/my-posts', (req, res) => {
+// Uncomment the following block to fetch and render posts
+    Post.find({user: req.user._id}).lean().populate('category').then(posts => {
+        res.render('admin/posts/my-posts', {posts: posts});
+    }).catch(err => {
+        console.log(err);
+    });
 });
 router.get('/edit/:id', (req, res) => {
     Post.findById(req.params.id).lean().then(post => {
@@ -58,6 +66,7 @@ router.put('/edit/:id', upload.single('file'), (req, res) => {
         let allowComments = req.body.allowComments ? true : false;
 
         // 更新帖子字段
+        post.user = req.user._id;
         post.title = req.body.title;
         post.status = req.body.status;
         post.allowComments = allowComments;
@@ -73,7 +82,7 @@ router.put('/edit/:id', upload.single('file'), (req, res) => {
         // 保存更新的帖子
         post.save().then(updatedPost => {
             req.flash('success', `Post ${post._id} updated!`);
-            res.redirect('/admin/posts');
+            res.redirect('/admin/posts/my-posts');
         }).catch(err => {
             console.error(err);
             res.redirect('/admin/posts/edit/' + req.params.id);
@@ -86,7 +95,7 @@ router.put('/edit/:id', upload.single('file'), (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(req.params.id).populate('comments');
 
         if (!post) {
             req.flash('error', 'Post not found');
@@ -107,11 +116,17 @@ router.delete('/:id', async (req, res) => {
                 return res.redirect('/admin/posts');
             }
         }
-
+        if (post.comments && post.comments.length > 0) {
+            console.log('Associated comments:', post.comments);
+        } else {
+            console.log('No comments associated with this post.');
+        }
+        // Delete associated comments
+        await Comment.deleteMany({ _id: { $in: post.comments } });
         // Delete the post from the database
         await Post.deleteOne({ _id: post._id });
         req.flash('success', `Post ${post._id} was deleted successfully`);
-        res.redirect('/admin/posts');
+        res.redirect('/admin/posts/my-posts');
     } catch (err) {
         console.error('Error during deletion:', err);
         req.flash('error', 'Error occurred while deleting the post');
@@ -129,6 +144,7 @@ router.post('/create', upload.single('file'), async (req, res) => {
 
         // 创建新帖子
         const newPost = new Post({
+            user:req.user._id,
             title: req.body.title,
             body: req.body.body,
             file: req.file.path, // Cloudinary 返回的 URL

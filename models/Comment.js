@@ -10,6 +10,10 @@ const CommentSchema = new Schema({
         type: String,
         required: true
     },
+    post: {
+        type: Schema.Types.ObjectId,
+        ref: 'Post'
+    },
     date:{
         type: Date,
         default: Date.now()

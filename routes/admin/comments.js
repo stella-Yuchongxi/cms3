@@ -19,7 +19,7 @@ async function removeTopThreeComments(postId) {
         }
 
         // Remove the first three comments from the `comments` array
-        post.comments = post.comments.slice(2);
+        post.comments = post.comments.slice(1);
 
         // Save the updated post
         await post.save();
@@ -75,9 +75,36 @@ router.post('/', (req, res) => {
 });
 // Route to display comments
 router.get('/index', (req, res)=>{
-    Comment.find({}).populate('user').then(comments => {
+    // removeTopThreeComments('675fa002ca4ac0565da00f94');
+    Comment.find({user: req.user._id}).populate('user').then(comments => {
         res.render('admin/comments',{comments:comments});
     });
 
 });
+router.post('/delete/:_id', async (req, res) => {
+    try {
+        // Delete the comment
+        const deleteComment = await Comment.findByIdAndDelete(req.params._id);
+        if (!deleteComment) {
+            return res.status(404).json({ error: "Comment not found." });
+        }
+
+        // Remove the reference to the comment from the associated post
+        const updatedPost = await Post.findOneAndUpdate(
+            { comments: req.params._id }, // Find the post containing the comment
+            { $pull: { comments: req.params._id } }, // Remove the comment ID from the array
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedPost) {
+            return res.status(404).json({ error: "Post not found for this comment." });
+        }
+
+        res.redirect("/admin/comments/index");
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        res.status(500).json({ error: "An error occurred while deleting the comment." });
+    }
+});
+
 module.exports = router;
