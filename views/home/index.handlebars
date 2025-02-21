@@ -14,7 +14,7 @@
             <div class="card-body">
                 <h2 class="card-title">{{title}}</h2>
 <!--                <p class="card-text">{{body}}</p>-->
-                <a href="/post/{{_id}}" class="btn btn-primary">Read More &rarr;</a>
+                <a href="/post/{{slug}}" class="btn btn-primary">Read More &rarr;</a>
                 <p class="mt-2 text-muted">Category: {{this.category.name}}</p>
 
             </div>
@@ -30,12 +30,15 @@
 
         <!-- Pagination -->
         <ul class="pagination justify-content-center mb-4">
-            <li class="page-item">
-                <a class="page-link" href="#">&larr; Older</a>
-            </li>
-            <li class="page-item disabled">
-                <a class="page-link" href="#">Newer &rarr;</a>
-            </li>
+            {{#paginate current = current pages = pages}}
+
+            {{/paginate}}
+<!--            <li class="page-item">-->
+<!--                <a class="page-link" href="#">&larr; Older</a>-->
+<!--            </li>-->
+<!--            <li class="page-item disabled">-->
+<!--                <a class="page-link" href="#">Newer &rarr;</a>-->
+<!--            </li>-->
         </ul>
 
     </div>

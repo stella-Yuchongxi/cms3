@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
 const Handlebars = require('handlebars');
-const { formatDate, generateDate, select, ifEquals} = require('./helpers/handlebars-helpers');
+const { formatDate, generateDate, select, ifEquals,paginate} = require('./helpers/handlebars-helpers');
 const { breaklines } = require('./helpers/breakline-helpers');
 const methodOverride = require('method-override');
 const session = require('express-session');
@@ -24,7 +24,8 @@ app.engine('handlebars', engine({
         generateDate: generateDate,
         select: select,
         breaklines: breaklines,
-        ifEquals: ifEquals
+        ifEquals: ifEquals,
+        paginate:paginate
     }
 }));
 app.set('view engine', 'handlebars');

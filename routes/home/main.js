@@ -17,38 +17,63 @@ router.all('/*', (req, res,next) => {
 
 router.get('/', async (req, res) => {
     try {
-        const categoryQuery = req.query.category; // Get the category parameter from the query string
+        const perPage = 10;
+        let page = parseInt(req.query.page, 10) || 1;
+        const categoryQuery = req.query.category;
         let filter = {};
 
-        // If a category is specified, add it to the filter for posts
+        // Ensure page is at least 1
+        if (page < 1) {
+            return res.redirect('/?page=1');
+        }
+
+        // Apply category filter if provided
         if (categoryQuery) {
             const category = await Category.findOne({ name: categoryQuery }).lean();
             if (category) {
-                filter.category = category._id; // Filter posts by the selected category's ID
+                filter.category = category._id;
             }
         }
 
-        // Find posts with or without the category filter and populate the category details
-        const posts = await Post.find(filter).lean().populate('category');
+        // Count total posts for pagination
+        const totalPosts = await Post.countDocuments(filter);
+        const totalPages = Math.ceil(totalPosts / perPage);
+
+        // Ensure `page` doesn't exceed total pages
+        if (page > totalPages && totalPages > 0) {
+            return res.redirect(`/?page=${totalPages}`);
+        }
+
+        // Fetch posts with category filter, pagination, and populate category details
+        const posts = await Post.find(filter)
+            .populate('category')
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .lean();
+
+        // Fetch all categories
         const categories = await Category.find({}).lean();
 
         res.render('home/index', {
-            posts: posts,
-            categories: categories,
-            selectedCategory: categoryQuery // Pass the selected category to the template
+            posts,
+            categories,
+            selectedCategory: categoryQuery,
+            current: page,
+            pages: totalPages,
         });
     } catch (err) {
-        console.log('Error fetching posts:', err);
+        console.error('Error fetching posts:', err);
         res.status(500).send('An error occurred while fetching posts.');
     }
 });
 
-router.get('/post/:id', async (req, res) => {
+router.get('/post/:slug', async (req, res) => {
     try {
         // Find the post by ID and populate comments and their user details
-        const post = await Post.findById(req.params.id)
+        const post = await Post.findOne({ slug: req.params.slug })
             .populate({
                 path: 'comments',
+                match:{approveComment:true},
                 populate: { path: 'user', model: 'User' },
             })
             .populate('user')

@@ -56,7 +56,8 @@ router.post('/', (req, res) => {
             // Create a new comment
             const newComment = new Comment({
                 user: req.user._id,
-                body: body
+                body: body,
+                approveComment: true
             });
 
             // Save the comment and update the post
@@ -77,7 +78,7 @@ router.post('/', (req, res) => {
 router.get('/index', (req, res)=>{
     // removeTopThreeComments('675fa002ca4ac0565da00f94');
     Comment.find({user: req.user._id}).populate('user').then(comments => {
-        res.render('admin/comments',{comments:comments});
+        res.render('admin/comments/index',{comments:comments});
     });
 
 });
@@ -106,5 +107,24 @@ router.post('/delete/:_id', async (req, res) => {
         res.status(500).json({ error: "An error occurred while deleting the comment." });
     }
 });
+router.post('/approve-comment', async (req, res) => {
+    try {
+        // Use async/await for findByIdAndUpdate
+        const result = await Comment.findByIdAndUpdate(
+            req.body.id, // ID of the comment
+            {$set: {approveComment: req.body.approveComment}}, // Update fields
+            {new: true} // Return the updated document
+        );
 
+        if (!result) {
+            return res.status(404).json({error: 'Comment not found.'});
+        }
+
+        // Send the updated comment as the response
+        res.status(200).json({success: true, comment: result});
+    } catch (err) {
+        console.error('Error updating comment:', err);
+        res.status(500).json({error: 'An error occurred while updating the comment.'});
+    }
+})
 module.exports = router;

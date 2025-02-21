@@ -21,6 +21,8 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
+    "bootstrap-switch": "^3.3.5",
+    "chart.js": "^4.4.7",
     "cloudinary": "^1.21.0",
     "connect-flash": "^0.1.1",
     "express": "^4.19.2",
@@ -33,11 +35,13 @@
     "moment": "^2.30.1",
     "mongodb": "^6.10.0",
     "mongoose": "^8.5.2",
+    "mongoose-url-slugs": "^0.1.4",
     "multer": "^1.4.5-lts.1",
     "multer-s3": "^3.0.1",
     "multer-storage-cloudinary": "^4.0.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "slugify": "^1.6.6"
   }
 }

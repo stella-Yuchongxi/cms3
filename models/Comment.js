@@ -10,6 +10,10 @@ const CommentSchema = new Schema({
         type: String,
         required: true
     },
+    approveComment:{
+        type:Boolean,
+        required:true
+    },
     post: {
         type: Schema.Types.ObjectId,
         ref: 'Post'
